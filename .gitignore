@@ -1,0 +1,10 @@
+# Ignore everything
+*
+# Don't ignore directories, so we can recurse into them
+!*/
+# Don't ignore .gitignore and docker-compose.yml and example.env
+!.gitignore
+!docker-compose.yml
+!example.env
+!LICENSE.txt
+!Caddyfile
