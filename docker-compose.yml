@@ -1,0 +1,51 @@
+version: '3'
+
+services:
+  vaultwarden:
+    image: vaultwarden/server:latest
+    container_name: vaultwarden
+    restart: always
+    environment:
+      DOMAIN: ${DOMAIN} #The domain or public address in use, DISABLE if using locally
+      SIGNUPS_ALLOWED: ${SIGNUPS_ALLOWED} #Allow or disallow new account registrations on the frontend
+      LOGIN_RATELIMIT_MAX_BURST: ${LOGIN_RATELIMIT_MAX_BURST} #Allow a burst of requests up to this value
+      LOGIN_RATELIMIT_SECONDS: ${LOGIN_RATELIMIT_SECONDS} #Number of secs between requests on average before rate limiting
+      SMTP_HOST: ${SMTP_HOST} #Your SMTP host
+      SMTP_FROM: ${SMTP_FROM} #Your from email address
+      SMTP_FROM_NAME: ${SMTP_FROM_NAME} #Your from name
+      SMTP_PORT: ${SMTP_PORT} #SMTP Port, please use the one approriate with the protocol
+      SMTP_SECURITY: ${SMTP_SECURITY} #SMTP security protocol such as starttls
+      SMTP_USERNAME: ${SMTP_USERNAME} #SMTP username
+      SMTP_PASSWORD: ${SMTP_PASSWORD} #SMTP password
+      SMTP_TIMEOUT: ${SMTP_TIMEOUT} #SMTP time to wait before disconecting
+      SMTP_AUTH_MECHANISM: ${SMTP_AUTH_MECHANISM} #Authentication mechanism being used
+      SHOW_PASSWORD_HINT: ${SHOW_PASSWORD_HINT} #Show password hint on the frontend
+      PASSWORD_HINTS_ALLOWED: ${PASSWORD_HINTS_ALLOWED} #Allow sending password hints via email
+      #  ADMIN_TOKEN: ${ADMIN_TOKEN} # Highly recommend not using the admin panel on a public install, if you are enabling this (continue reading in next line)
+      #  Use argon2 to generate a highly secure token. Disable when not needed. Look at commented lines below for an example command and output example
+      #  Everything witin the output is your token
+      #  Command: echo -n "YourSuperSecretSuperLongSuperStrongAdminPassword" | argon2 "$(openssl rand -base64 32)" -e -id -k 65540 -t 3 -p 4
+      #  Output: $argon2id$v=19$m=65540,t=3,p=YourSuperSecretSuperLongSuperStrongAdminPassword
+      #  There are other issues with using the admin section, please refer to https://github.com/dani-garcia/vaultwarden/wiki/Enabling-admin-page
+
+    volumes:
+      - ./vw-data:/data #Telling the container where to store persistent data
+    
+    # ports:  ##ONLY Uncomment this line and the next line if you are running within your local network
+    #   - 80:80
+
+  caddy: #Comment out this entire section if you plan to run within your local network only
+    image: caddy:2
+    container_name: caddy
+    restart: always
+    ports:
+     - 80:80 #Required for ACME challenge
+     - 443:443 #SSL / https typically connects over this port
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddu-config:/config
+      - ./caddy-data:/data
+    environment:
+      DOMAIN: ${CADDY_DOMAIN}
+      EMAIL: ${CADDY_EMAIL}
+      LOG_FILE: ${CADDY_LOG_FILE}
