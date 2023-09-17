@@ -4,6 +4,7 @@ services:
   vaultwarden:
     image: vaultwarden/server:latest
     container_name: vaultwarden
+    user: 1000:1000
     restart: always
     environment:
       DOMAIN: ${DOMAIN} #The domain or public address in use, DISABLE if using locally
