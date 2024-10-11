@@ -7,7 +7,7 @@
     }
   }
 
-  # Use the ACME HTTP-01 challenge to get a cert for the configured domain.
+  Use the ACME HTTP-01 challenge to get a cert for the configured domain.
   tls {$EMAIL}
 
   # This setting may have compatibility issues with some browsers
@@ -28,10 +28,16 @@
        -Server
   }
 
-  # Proxy everything Rocket
-  reverse_proxy vaultwarden:80 {
-       # Send the true remote IP to Rocket, so that vaultwarden can put this in the
-       # log, so that fail2ban can ban the correct IP.
-       header_up X-Real-IP {remote_host}
+vault.{$MY_DOMAIN} {
+	reverse_proxy vaultwarden:80 {
+		# Send the true remote IP to Rocket, so that vaultwarden can put this in the log, so that fail2ban can ban the correct IP.
+		header_up X-Real-IP {remote_host}
+	}
+	tls {
+		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+	}
+}
+
+
   }
 }
